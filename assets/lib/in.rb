@@ -19,7 +19,10 @@ $stderr.puts 'DEPRECATION: Please note that you should update to using `version:
 
 pr = Octokit.pull_request(input['source']['repo'], input['version']['pr'])
 id = pr['number']
-branch_ref = pr['head']['ref']
+
+# EROAD XXX: Use 'tmp' because pr['head']['ref'] assumes people don't make pull requests from their 'master' branch.
+#branch_ref = pr['head']['ref']
+branch_ref = 'tmp'
 
 system("git clone --depth 1 #{uri} #{destination} 1>&2")
 
