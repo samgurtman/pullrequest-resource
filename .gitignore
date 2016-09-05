@@ -2,3 +2,6 @@
 example/
 .bundle
 bin
+
+.idea
+.idea/*

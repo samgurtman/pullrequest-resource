@@ -16,7 +16,7 @@ resource_types:
 - name: pull-request
   type: docker-image
   source:
-    repository: jtarchie/pr
+    repository: eroad/pr
 ```
 
 ## Source Configuration

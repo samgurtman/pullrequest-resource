@@ -1,0 +1,29 @@
+resources:
+
+- name: pullrequest-resource
+  type: git
+  check_every: 10s
+  source:
+    uri: https://github.com/eroad/pullrequest-resource.git
+    branch: master
+    username: {{github-username}}
+    password: {{github-password}}
+
+- name: image
+  type: docker-image
+  source:
+    repository: eroadltd/pr
+    username: {{docker-username}}
+    password: {{docker-password}}
+
+jobs:
+
+- name: docker-build
+  serial: true
+  plan:
+  - aggregate:
+    - get: pullrequest-resource
+      trigger: true
+  - put: image
+    params:
+      build: pullrequest-resource
