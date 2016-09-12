@@ -30,7 +30,7 @@ raise 'git clone failed' unless $CHILD_STATUS.exitstatus == 0
 
 Dir.chdir(destination) do
   system('git submodule update --init --recursive 1>&2')
-  system("git fetch -q origin pull/#{id}/head:#{branch_ref} 1>&2")
+  raise 'git clone failed' unless system("git fetch -q origin pull/#{id}/head:#{branch_ref} 1>&2")
   system("git checkout #{branch_ref} 1>&2")
   system("git config --add pullrequest.url #{pr['html_url']} 1>&2")
   system("git config --add pullrequest.id #{pr['number']} 1>&2")
