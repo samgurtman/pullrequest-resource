@@ -1,3 +1,6 @@
+# OFFICIAL REPO NOW FIXED! - DON'T USE THIS FORK
+See https://github.com/jtarchie/pullrequest-resource/issues/33
+
 # Github Pull Request Resource
 
 Tracks pull requests made to a particular github repo. In the spirit of [Travis
