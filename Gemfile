@@ -1,7 +1,13 @@
+# frozen_string_literal: true
+
 source 'https://rubygems.org'
 
-gem 'octokit'
+ruby '~> 2.4'
+
+gem 'activesupport'
+gem 'faraday-http-cache'
 gem 'httpclient'
+gem 'octokit'
 
 group :development do
   gem 'pry'
@@ -10,6 +16,7 @@ group :development do
 end
 
 group :test do
-  gem 'rspec'
   gem 'puffing-billy'
+  gem 'rspec'
+  gem 'webmock'
 end

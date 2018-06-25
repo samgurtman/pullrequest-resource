@@ -1,8 +1,12 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'json'
 require 'tmpdir'
 
 describe 'get' do
+  include CliIntegration
+
   let(:proxy) { Billy::Proxy.new }
   let(:dest_dir) { Dir.mktmpdir }
   let(:git_dir)  { Dir.mktmpdir }
@@ -21,61 +25,24 @@ describe 'get' do
   end
 
   before do
-    proxy.stub('https://api.github.com:443/repos/jtarchie/test/pulls/1')
-         .and_return(json: { html_url: 'http://example.com', number: 1, head: { ref: 'foo' } })
-
     git('init -q')
+    `rm -Rf #{git_dir}/.git/hooks`
     @ref = commit('init')
     commit('second')
 
     git("update-ref refs/pull/1/head #{@ref}")
+    git("update-ref refs/pull/1/merge #{@ref}")
   end
 
-  it 'checks out the pull request to dest_dir' do
-    get(version: { ref: @ref, pr: '1' }, source: { access_token: 'abc', uri: git_uri, repo: 'jtarchie/test' })
-    expect(@ref).to eq git('log --format=format:%H HEAD', dest_dir)
-  end
-
-  it 'returns the correct JSON metadata' do
-    output, = get(version: { ref: @ref, pr: '1' }, source: { uri: git_uri, repo: 'jtarchie/test' })
-    expect(output).to eq('version'  => { 'ref' => @ref, 'pr' => '1' },
-                         'metadata' => [{
-                           'name' => 'url',
-                           'value' => 'http://example.com'
-                         }])
-  end
-
-  it 'adds metadata to `git config`' do
-    get(version: { ref: @ref, pr: '1' }, source: { uri: git_uri, repo: 'jtarchie/test' })
-
-    value = git('config --get pullrequest.url', dest_dir)
-    expect(value).to eq 'http://example.com'
-  end
-
-  it 'checks out as a branch' do
-    get(version: { ref: @ref, pr: '1' }, source: { uri: git_uri, repo: 'jtarchie/test' })
-
-    value = git('rev-parse --abbrev-ref HEAD', dest_dir)
-    expect(value).to eq 'foo'
-  end
-
-  it 'sets config variable to branch name' do
-    get(version: { ref: @ref, pr: '1' }, source: { uri: git_uri, repo: 'jtarchie/test' })
-    value = git('config pullrequest.branch', dest_dir)
-    expect(value).to eq 'foo'
-  end
-
-  context 'when the git clone fails' do
-    it 'provides a helpful erorr message' do
-      _, error = get(version: { ref: @ref, pr: '1' }, source: { uri: 'invalid_git_uri', repo: 'jtarchie/test' })
-      expect(error).to include 'git clone failed'
+  context 'for every PR that is checked out' do
+    before do
+      proxy.stub('https://api.github.com:443/repos/jtarchie/test/pulls/1')
+           .and_return(json: { html_url: 'http://example.com', number: 1, head: { ref: 'foo' }, base: { ref: 'master', user: { login: 'jtarchie' } }, user: { login: 'jtarchie-contributor' } })
     end
-  end
 
-  context 'when `every` is not defined' do
-    it 'shows a deprecation warning' do
-      _, error = get(version: { ref: @ref, pr: '1' }, source: { uri: git_uri, repo: 'jtarchie/test' })
-      expect(error).to include 'DEPRECATION: Please note that you should update to using `version: every` on your `get` for this resource.'
+    it 'checks out the pull request to dest_dir' do
+      get(version: { ref: @ref, pr: '1' }, source: { access_token: 'abc', uri: git_uri, repo: 'jtarchie/test' })
+      expect(@ref).to eq git('log --format=format:%H HEAD', dest_dir)
     end
   end
 end

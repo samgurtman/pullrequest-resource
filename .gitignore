@@ -2,6 +2,6 @@
 example/
 .bundle
 bin
-
-.idea
-.idea/*
+.secrets.yml
+test_pipeline.yml
+.vscode/
